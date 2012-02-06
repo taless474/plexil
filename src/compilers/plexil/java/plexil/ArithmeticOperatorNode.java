@@ -45,7 +45,11 @@ public class ArithmeticOperatorNode extends ExpressionNode
         super(new CommonToken(ttype, getTokenString(ttype)));
     }
 
-    // I *think* this is only needed for ABS_KYWD...
+	public Tree dupNode()
+	{
+		return new ArithmeticOperatorNode(this);
+	}
+
     private static String getTokenString(int ttype)
     {
         switch (ttype) {
@@ -110,28 +114,25 @@ public class ArithmeticOperatorNode extends ExpressionNode
             // Implement numeric type contagion
             for (int i = 0; i < this.getChildCount(); i++) {
                 PlexilDataType childType = ((ExpressionNode) this.getChild(i)).getDataType();
-                if (workingType == null) {
-                    if (childType.isNumeric())
-                        workingType = childType; 
-                    else {
-                        workingType = PlexilDataType.ERROR_TYPE;
-                        break;
-                    }
-                }
-                else if (childType == PlexilDataType.REAL_TYPE
-                         && workingType == PlexilDataType.INTEGER_TYPE) 
-                    workingType = PlexilDataType.REAL_TYPE;
-                else if (childType != PlexilDataType.INTEGER_TYPE) {
+				if (!childType.isNumeric()) {
                     workingType = PlexilDataType.ERROR_TYPE;
                     break;
-                }
+                }   
+				if (workingType == null)
+					workingType = childType; 
+				else if (childType == workingType)
+					continue;
+                else if (childType == PlexilDataType.REAL_TYPE
+                         && workingType == PlexilDataType.INTEGER_TYPE)
+					// Contagion case - promote to REAL
+                    workingType = PlexilDataType.REAL_TYPE;
             }
         }
         // debug aid
         if (m_dataType == PlexilDataType.ERROR_TYPE) {
             state.addDiagnostic(this,
                                 "Internal error: ArithmeticOperatorNode.earlyCheck could not determine expression type",
-                                Severity.NOTE);
+                                Severity.ERROR);
         }
         m_dataType = workingType;
     }
@@ -238,22 +239,29 @@ public class ArithmeticOperatorNode extends ExpressionNode
     public String getXMLElementName()
     {
         switch (this.getType()) {
-        case PlexilLexer.PLUS:
-            if (m_dataType == PlexilDataType.STRING_TYPE)
-                return "Concat";
-            else return "ADD";
-			
-        case PlexilLexer.MINUS:
-            return "SUB";
+		case PlexilLexer.ABS_KYWD:
+			return "ABS";
 
         case PlexilLexer.ASTERISK:
             return "MUL";
 
+        case PlexilLexer.MINUS:
+            return "SUB";
+
+		case PlexilLexer.MOD_KYWD:
+        case PlexilLexer.PERCENT:
+            return "MOD";
+
+        case PlexilLexer.PLUS:
+            if (m_dataType == PlexilDataType.STRING_TYPE)
+                return "Concat";
+            else return "ADD";
+
         case PlexilLexer.SLASH:
             return "DIV";
 
-        case PlexilLexer.PERCENT:
-            return "MOD";
+		case PlexilLexer.SQRT_KYWD:
+			return "SQRT";
 
         default:
             return this.getToken().getText();

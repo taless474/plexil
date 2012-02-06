@@ -62,6 +62,11 @@ public class PlexilTreeNode extends org.antlr.runtime.tree.CommonTree
     //
     // Overrides
     //
+	public Tree dupNode()
+	{
+		return new PlexilTreeNode(this);
+	}
+
     public PlexilTreeNode getChild(int i)
     {
         return (PlexilTreeNode) super.getChild(i);
@@ -154,6 +159,7 @@ public class PlexilTreeNode extends org.antlr.runtime.tree.CommonTree
         }
         return m_xml;
     }
+
 
     /**
      * @brief Construct the XML representing this part of the parse tree, and store it in m_xml.

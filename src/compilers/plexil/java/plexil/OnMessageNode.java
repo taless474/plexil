@@ -37,10 +37,28 @@ public class OnMessageNode extends PlexilTreeNode
         super(t);
     }
 
+    public OnMessageNode(OnMessageNode n)
+    {
+        super(n);
+    }
+
+	public Tree dupNode()
+	{
+		return new OnMessageNode(this);
+	}
+
+	// Format is:
+	// ^(ON_MESSAGE_KYWD expression action)
+
     public void checkSelf(NodeContext context, CompilerState state)
     {
-        // TBD
-        // see that the expression is a string expression
+		// Ensure that the message is a string expression
+		ExpressionNode msgName = (ExpressionNode) this.getChild(0);
+		if (!msgName.assumeType(PlexilDataType.STRING_TYPE, state)) {
+			state.addDiagnostic(msgName,
+								"The OnCommand message expression is not a String expression",
+								Severity.ERROR);
+		}
     }
 
     public void constructXML()

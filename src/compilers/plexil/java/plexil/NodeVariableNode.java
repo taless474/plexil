@@ -70,8 +70,13 @@ public class NodeVariableNode extends ExpressionNode
     public NodeVariableNode(NodeVariableNode n)
     {
         super(n);
-        setType();
     }
+
+	public Tree dupNode()
+	{
+		return new NodeVariableNode(this);
+	}
+
 
     // TBD
     //    public void check(NodeContext context, CompilerState myState)
@@ -86,9 +91,20 @@ public class NodeVariableNode extends ExpressionNode
         // for this construct.
         m_xml = new XMLElement(this.getXMLElementName());
 
-        IXMLElement id = new XMLElement ("NodeId");
-        id.setContent (this.getChild(0).getText());
-        m_xml.addChild (id);
+		PlexilTreeNode nodeRef = this.getChild(0);
+		if (nodeRef.getToken().getType() == PlexilLexer.NCNAME) {
+			IXMLElement id = new XMLElement ("NodeId");
+			id.setContent (this.getChild(0).getText());
+			m_xml.addChild (id);
+		}
+		else if (nodeRef instanceof NodeRefNode) {
+			// NodeRef
+			m_xml.addChild(nodeRef.getXML());
+		}
+		else {
+			IXMLElement err = new XMLElement("_NODE_REF_ERROR_");
+			m_xml.addChild(err);
+		}
 
 		if (this.getToken().getType() == PlexilLexer.NODE_TIMEPOINT_VALUE) {
 			IXMLElement state = new XMLElement("NodeStateValue");

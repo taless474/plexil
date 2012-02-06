@@ -38,12 +38,23 @@ public class ConditionNode extends PlexilTreeNode
         super(t);
     }
 
+    public ConditionNode(ConditionNode n)
+    {
+        super(n);
+    }
+
+	public Tree dupNode()
+	{
+		return new ConditionNode(this);
+	}
+
     public void checkSelf(NodeContext context, CompilerState myState)
     {
         ExpressionNode exp = (ExpressionNode) this.getChild(0);
         if (exp.getDataType() != PlexilDataType.BOOLEAN_TYPE) {
             myState.addDiagnostic(exp,
-                                  this.getToken().getText() + " expression is not Boolean",
+                                  this.getToken().getText() + " expression type is "
+								  + exp.getDataType().typeName() + ", not Boolean",
                                   Severity.ERROR);
         }
     }

@@ -1,4 +1,4 @@
-// Copyright (c) 2006-2010, Universities Space Research Association (USRA).
+// Copyright (c) 2006-2011, Universities Space Research Association (USRA).
 //  All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -96,21 +96,6 @@ action :
     ^(ACTION
       (id=NCNAME
        { /* check that id is unique in current context */ } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       )?
 	  actionBody)
  ;
@@ -284,7 +269,6 @@ nodeAttribute :
   | permissions
   | priority
   | resource
-  | resourcePriority
  ;
 
 nodeCondition : 
@@ -323,10 +307,6 @@ resourceOption :
       { /* check that expression is Boolean */ }
  ;
 
-resourcePriority :
-    ^(RESOURCE_PRIORITY_KYWD expression) /* check that expression is numeric? */
- ;
-
 ///////////////////
 //  EXPRESSIONS  //
 ///////////////////
@@ -361,14 +341,23 @@ arrayReference :
  ;
 
 internalVariableReference :
-    ( ^(COMMAND_HANDLE_KYWD nodeId=NCNAME) { /* check that node is a COMMAND node */ }
-    | ^(nodeStatePredicate nodeId=NCNAME) { /* check that node exists */ }
-    | ^(FAILURE_KYWD nodeId=NCNAME) { /* check that node exists */ }
-    | ^(OUTCOME_KYWD nodeId=NCNAME) { /* check that node exists */ }
-    | ^(STATE_KYWD nodeId=NCNAME) { /* check that node exists */ }
-    | ^(NODE_TIMEPOINT_VALUE nodeId=NCNAME nodeStateKywd timepoint) { /* check that node exists */ }
+    ( ^(COMMAND_HANDLE_KYWD nodeReference) { /* check that node is a COMMAND node */ }
+    | ^(nodeStatePredicate nodeReference) { /* check that node exists */ }
+    | ^(FAILURE_KYWD nodeReference) { /* check that node exists */ }
+    | ^(OUTCOME_KYWD nodeReference) { /* check that node exists */ }
+    | ^(STATE_KYWD nodeReference) { /* check that node exists */ }
+    | ^(NODE_TIMEPOINT_VALUE nodeReference nodeStateKywd timepoint) { /* check that node exists */ }
     )
  ;
+
+nodeReference :
+    SELF_KYWD
+  | PARENT_KYWD
+  | NCNAME
+  | ^(CHILD_KYWD NCNAME)
+  | ^(SIBLING_KYWD NCNAME)
+ ;
+  
 
 timepoint : START_KYWD | END_KYWD ;
 
@@ -483,11 +472,10 @@ binaryOp :
   | DEQUALS | NEQUALS
   | GREATER | GEQ | LESS | LEQ
   | PLUS | MINUS
-  | ASTERISK | SLASH | PERCENT
+  | ASTERISK | SLASH | PERCENT | MOD_KYWD
  ;
 
 unaryOp :
-    PLUS | MINUS // also binary ops
-  | NOT_KYWD
-  | SQRT_KYWD | ABS_KYWD
+ | NOT_KYWD
+ | SQRT_KYWD | ABS_KYWD
  ;
